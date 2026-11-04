@@ -1,0 +1,49 @@
+
+name: MERN checks and image builds
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get the project files
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install backend dependencies
+        working-directory: ./backend
+        run: npm ci
+
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Check frontend code style
+        working-directory: ./frontend
+        run: npm run lint
+
+      - name: Build frontend application
+        working-directory: ./frontend
+        run: npm run build
+
+      - name: Build backend Docker image
+        run: |
+          docker build -t mern-backend:latest ./backend
+
+      - name: Build frontend Docker image
+        run: |
+          docker build -t mern-frontend:latest ./frontend
+
+      - name: Validate Docker Compose configuration
+        run: docker compose -f compose.yaml config --quiet

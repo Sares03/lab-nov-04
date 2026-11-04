@@ -1,0 +1,36 @@
+
+services:
+  mongodb:
+    image: mongo:7
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - mern-network
+
+  backend:
+    build: ./backend
+    ports:
+      - "4000:4000"
+    environment:
+      PORT: 4000
+      MONGODB_URL: mongodb://mongodb:27017/mern_lab
+    depends_on:
+      - mongodb
+    networks:
+      - mern-network
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    networks:
+      - mern-network
+
+volumes:
+  mongo_data:
+
+networks:
+  mern-network:
+    driver: bridge
